@@ -1,18 +1,18 @@
 #include <stdio.h>
 #include <time.h>
 
-// Tarih ve saat bilgisi için struct
+// Tarih ve saat bilgisi iÃ§in struct
 struct DateTime {
     int yil, ay, gun, saat, dakika, saniye;
 };
 
-// Struct ve epoch zamanını aynı bellek alanında saklamak için union
+// Struct ve epoch zamanÄ±nÄ± aynÄ± bellek alanÄ±nda saklamak iÃ§in union
 union TimeData {
     struct DateTime dt;
     time_t epoch;
 };
 
-// Kullanıcıdan tarih ve saat bilgisi alma fonksiyonu
+// KullanÄ±cÄ±dan tarih ve saat bilgisi alma fonksiyonu
 void tarihBilgisiAl(struct DateTime *dt) {
     printf("Yil: ");
     scanf("%d", &dt->yil);
@@ -28,11 +28,11 @@ void tarihBilgisiAl(struct DateTime *dt) {
     scanf("%d", &dt->saniye);
 }
 
-// Tarih bilgisini epoch zamanına çeviren fonksiyon
+// Tarih bilgisini epoch zamanÄ±na Ã§eviren fonksiyon
 time_t tariheDonustur(struct DateTime dt) {
     struct tm t = {0};
-    t.tm_year = dt.yil - 1900;  // Yıl 1900'den başlar
-    t.tm_mon = dt.ay - 1;       // Aylar 0'dan başlar
+    t.tm_year = dt.yil - 1900;  // YÄ±l 1900'den baÅŸlar
+    t.tm_mon = dt.ay - 1;       // Aylar 0'dan baÅŸlar
     t.tm_mday = dt.gun;
     t.tm_hour = dt.saat;
     t.tm_min = dt.dakika;
@@ -44,28 +44,39 @@ time_t tariheDonustur(struct DateTime dt) {
 int main() {
     union TimeData bayram1, bayram2;
     double fark;
+    int yil_farki, ay_farki, gun_farki, saat_farki, dakika_farki, saniye_farki;
 
-    // Kullanıcıdan ilk bayram tarihi
+    // KullanÄ±cÄ±dan ilk bayram tarihi
     printf("Birinci bayramin tarihini giriniz:\n");
     tarihBilgisiAl(&bayram1.dt);
 
-    // Kullanıcıdan ikinci bayram tarihi
+    // KullanÄ±cÄ±dan ikinci bayram tarihi
     printf("\nIkinci bayramin tarihini giriniz:\n");
     tarihBilgisiAl(&bayram2.dt);
 
-    // Bayram tarihlerini epoch zamanına çevir
+    // Bayram tarihlerini epoch zamanÄ±na Ã§evir
     bayram1.epoch = tariheDonustur(bayram1.dt);
     bayram2.epoch = tariheDonustur(bayram2.dt);
 
-    // Zaman farkını hesapla
+    // Zaman farkÄ±nÄ± hesapla
     fark = difftime(bayram2.epoch, bayram1.epoch);
 
-    // Sonuçları ekrana yazdır
+    // GÃ¼n, saat, dakika ve saniye farklarÄ±nÄ± hesapla
+    gun_farki = fark / (60 * 60 * 24);
+    saat_farki = ((int)fark % (60 * 60 * 24)) / (60 * 60);
+    dakika_farki = ((int)fark % (60 * 60)) / 60;
+    saniye_farki = (int)fark % 60;
+
+    // YÄ±l ve ay farkÄ±nÄ± hesapla
+    yil_farki = bayram2.dt.yil - bayram1.dt.yil;
+    ay_farki = (bayram2.dt.ay + yil_farki * 12) - bayram1.dt.ay;
+
+    // SonuÃ§larÄ± ekrana yazdÄ±r
     printf("\nBirinci Bayram Epoch Zamani: %ld\n", bayram1.epoch);
     printf("Ikinci Bayram Epoch Zamani: %ld\n", bayram2.epoch);
-    printf("Iki bayram arasindaki fark: %.0f saniye\n", fark);
-    printf("Iki bayram arasindaki fark: %.0f gun\n", fark / (60 * 60 * 24));
+    printf("Iki bayram arasindaki fark:\n");
+    printf("%d yil, %d ay, %d gun, %d saat, %d dakika, %d saniye\n",
+           yil_farki, ay_farki, gun_farki, saat_farki, dakika_farki, saniye_farki);
 
     return 0;
 }
-
