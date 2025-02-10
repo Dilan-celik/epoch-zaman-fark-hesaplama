@@ -11,7 +11,7 @@ struct Zaman {
     int saat, dakika, saniye, salise;
 };
 
-// Kullan�c�dan tarih bilgisi alma fonksiyonu
+// Kullanıcıdan tarih bilgisi alma fonksiyonu
 void tarihAl(struct Tarih *tarih) {
     printf("Yil: ");
     scanf("%d", &tarih->yil);
@@ -21,7 +21,7 @@ void tarihAl(struct Tarih *tarih) {
     scanf("%d", &tarih->gun);
 }
 
-// Kullan�c�dan zaman bilgisi alma fonksiyonu
+// Kullanıcıdan zaman bilgisi alma fonksiyonu
 void zamanAl(struct Zaman *zaman) {
     printf("Saat: ");
     scanf("%d", &zaman->saat);
@@ -53,13 +53,14 @@ int main() {
     struct Zaman zaman1, zaman2;
     time_t epoch1, epoch2;
     double fark;
+    int yil_farki, ay_farki, gun_farki, saat_farki, dakika_farki, saniye_farki, salise_farki;
 
-    // Kullan�c�dan birinci tarih ve saat bilgisi al
+    // Kullanıcıdan birinci tarih ve saat bilgisi al
     printf("Birinci tarih ve saat bilgilerini giriniz:\n");
     tarihAl(&tarih1);
     zamanAl(&zaman1);
 
-    // Kullan�c�dan ikinci tarih ve saat bilgisi al
+    // Kullanıcıdan ikinci tarih ve saat bilgisi al
     printf("\nIkinci tarih ve saat bilgilerini giriniz:\n");
     tarihAl(&tarih2);
     zamanAl(&zaman2);
@@ -71,11 +72,23 @@ int main() {
     // Zaman farkini hesapla
     fark = difftime(epoch2, epoch1);
 
-    // Sonuclari ekrana yazdir
+    // Gün, saat, dakika, saniye ve salise farklarını hesapla
+    gun_farki = fark / (60 * 60 * 24);
+    saat_farki = ((int)fark % (60 * 60 * 24)) / (60 * 60);
+    dakika_farki = ((int)fark % (60 * 60)) / 60;
+    saniye_farki = (int)fark % 60;
+    salise_farki = ((epoch2 - epoch1) * 1000) % 1000; // Milisaniye farkı için
+
+    // Yıl ve ay farkını hesapla
+    yil_farki = tarih2.yil - tarih1.yil;
+    ay_farki = (tarih2.ay + yil_farki * 12) - tarih1.ay;
+
+    // Sonuçları ekrana yazdır
     printf("\nBirinci Tarihin Epoch Zamani: %ld\n", epoch1);
     printf("Ikinci Tarihin Epoch Zamani: %ld\n", epoch2);
-    printf("Iki tarih arasindaki fark: %.0f saniye\n", fark);
+    printf("Iki tarih arasindaki fark:\n");
+    printf("%d yil, %d ay, %d gun, %d saat, %d dakika, %d saniye, %d salise\n",
+           yil_farki, ay_farki, gun_farki, saat_farki, dakika_farki, saniye_farki, salise_farki);
 
     return 0;
 }
-
