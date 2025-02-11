@@ -1,14 +1,20 @@
 #include <stdio.h>
 #include <time.h>
 
-// Tarih bilgisi icin struct
+// Tarih bilgisi için struct
 struct Tarih {
     int yil, ay, gun;
 };
 
-// Zaman bilgisi icin struct
+// Zaman bilgisi için struct
 struct Zaman {
     int saat, dakika, saniye, salise;
+};
+
+// Epoch ve zaman farkı için union
+union EpochZaman {
+    time_t epoch;
+    double fark;
 };
 
 // Kullanıcıdan tarih bilgisi alma fonksiyonu
@@ -33,27 +39,24 @@ void zamanAl(struct Zaman *zaman) {
     scanf("%d", &zaman->salise);
 }
 
-// Tarih ve zaman bilgisini epoch zamanina ceviren fonksiyon
+// Tarih ve zaman bilgisini epoch zamanına çeviren fonksiyon
 time_t epochHesapla(struct Tarih tarih, struct Zaman zaman) {
     struct tm t = {0};
-    t.tm_year = tarih.yil - 1900;  // Yil 1900'den baslar
-    t.tm_mon = tarih.ay - 1;       // Aylar 0'dan baslar
+    t.tm_year = tarih.yil - 1900;
+    t.tm_mon = tarih.ay - 1;
     t.tm_mday = tarih.gun;
     t.tm_hour = zaman.saat;
     t.tm_min = zaman.dakika;
     t.tm_sec = zaman.saniye;
-
-    // Salise hesaplamasini yapmak icin mktime'e ekleme
-    time_t epoch = mktime(&t);
-    return epoch + zaman.salise / 1000; // Salise milisaniye olarak eklenir
+    
+    return mktime(&t);
 }
 
 int main() {
     struct Tarih tarih1, tarih2;
     struct Zaman zaman1, zaman2;
-    time_t epoch1, epoch2;
-    double fark;
-    int yil_farki, ay_farki, gun_farki, saat_farki, dakika_farki, saniye_farki, salise_farki;
+    union EpochZaman epoch1, epoch2, fark;
+    int gun_farki, saat_farki, dakika_farki, saniye_farki;
 
     // Kullanıcıdan birinci tarih ve saat bilgisi al
     printf("Birinci tarih ve saat bilgilerini giriniz:\n");
@@ -65,30 +68,24 @@ int main() {
     tarihAl(&tarih2);
     zamanAl(&zaman2);
 
-    // Epoch zamanini hesapla
-    epoch1 = epochHesapla(tarih1, zaman1);
-    epoch2 = epochHesapla(tarih2, zaman2);
+    // Epoch zamanlarını hesapla
+    epoch1.epoch = epochHesapla(tarih1, zaman1);
+    epoch2.epoch = epochHesapla(tarih2, zaman2);
 
-    // Zaman farkini hesapla
-    fark = difftime(epoch2, epoch1);
+    // Zaman farkını hesapla
+    fark.epoch = epoch2.epoch - epoch1.epoch;
 
-    // Gün, saat, dakika, saniye ve salise farklarını hesapla
-    gun_farki = fark / (60 * 60 * 24);
-    saat_farki = ((int)fark % (60 * 60 * 24)) / (60 * 60);
-    dakika_farki = ((int)fark % (60 * 60)) / 60;
-    saniye_farki = (int)fark % 60;
-    salise_farki = ((epoch2 - epoch1) * 1000) % 1000; // Milisaniye farkı için
-
-    // Yıl ve ay farkını hesapla
-    yil_farki = tarih2.yil - tarih1.yil;
-    ay_farki = (tarih2.ay + yil_farki * 12) - tarih1.ay;
+    // Gün, saat, dakika ve saniye farklarını hesapla
+    gun_farki = fark.epoch / (60 * 60 * 24);
+    saat_farki = (fark.epoch % (60 * 60 * 24)) / (60 * 60);
+    dakika_farki = (fark.epoch % (60 * 60)) / 60;
+    saniye_farki = fark.epoch % 60;
 
     // Sonuçları ekrana yazdır
-    printf("\nBirinci Tarihin Epoch Zamani: %ld\n", epoch1);
-    printf("Ikinci Tarihin Epoch Zamani: %ld\n", epoch2);
+    printf("\nBirinci Tarihin Epoch Zamani: %ld\n", epoch1.epoch);
+    printf("Ikinci Tarihin Epoch Zamani: %ld\n", epoch2.epoch);
     printf("Iki tarih arasindaki fark:\n");
-    printf("%d yil, %d ay, %d gun, %d saat, %d dakika, %d saniye, %d salise\n",
-           yil_farki, ay_farki, gun_farki, saat_farki, dakika_farki, saniye_farki, salise_farki);
-
+    printf("%d gun, %d saat, %d dakika, %d saniye\n", gun_farki, saat_farki, dakika_farki, saniye_farki);
+    
     return 0;
 }
